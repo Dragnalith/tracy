@@ -213,7 +213,8 @@ public:
         if( m_tail == m_head ) return;
 
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() )
+#endif
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() )
         {
             vkCmdResetQueryPool( cmdbuf, m_query, 0, m_queryCount );
             m_head = m_tail = m_oldCnt = 0;
@@ -221,7 +222,6 @@ public:
             if( m_timeDomain != VK_TIME_DOMAIN_DEVICE_EXT ) Calibrate( m_device, m_prevCalibration, tgpu );
             return;
         }
-#endif
 
         unsigned int cnt;
         if( m_oldCnt != 0 )
@@ -338,9 +338,9 @@ class VkCtxScope
 public:
     tracy_force_inline VkCtxScope( VkCtx* ctx, const SourceLocationData* srcloc, VkCommandBuffer cmdbuf, bool is_active )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -362,9 +362,9 @@ public:
 
     tracy_force_inline VkCtxScope( VkCtx* ctx, const SourceLocationData* srcloc, VkCommandBuffer cmdbuf, int depth, bool is_active )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -386,9 +386,9 @@ public:
 
     tracy_force_inline VkCtxScope( VkCtx* ctx, uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz, VkCommandBuffer cmdbuf, bool is_active )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -411,9 +411,9 @@ public:
 
     tracy_force_inline VkCtxScope( VkCtx* ctx, uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz, VkCommandBuffer cmdbuf, int depth, bool is_active )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;

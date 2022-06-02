@@ -148,8 +148,8 @@ static t_GetThreadDescription _GetThreadDescription = 0;
 void WINAPI EventRecordCallback( PEVENT_RECORD record )
 {
 #ifdef TRACY_ON_DEMAND
-    if( !GetProfiler().IsConnected() ) return;
 #endif
+    if( !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
 
     const auto& hdr = record->EventHeader;
     switch( hdr.ProviderId.Data1 )
@@ -233,8 +233,8 @@ static uint32_t VsyncTarget[8] = {};
 void WINAPI EventRecordCallbackVsync( PEVENT_RECORD record )
 {
 #ifdef TRACY_ON_DEMAND
-    if( !GetProfiler().IsConnected() ) return;
 #endif
+    if( !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
 
     const auto& hdr = record->EventHeader;
     assert( hdr.ProviderId.Data1 == 0x802EC45A );

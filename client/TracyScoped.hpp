@@ -23,9 +23,9 @@ public:
 
     tracy_force_inline ScopedZone( const SourceLocationData* srcloc, bool is_active = true )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -40,9 +40,9 @@ public:
 
     tracy_force_inline ScopedZone( const SourceLocationData* srcloc, int depth, bool is_active = true )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -59,9 +59,9 @@ public:
 
     tracy_force_inline ScopedZone( uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz, bool is_active = true )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -77,9 +77,9 @@ public:
 
     tracy_force_inline ScopedZone( uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz, int depth, bool is_active = true )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;

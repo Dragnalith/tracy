@@ -157,11 +157,13 @@ public:
 
 #ifdef TRACY_ON_DEMAND
         if( !GetProfiler().IsConnected() )
+#else
+        if ( !ProvilerAvailable() )
+#endif
         {
             m_head = m_tail = 0;
             return;
         }
-#endif
 
         auto start = m_tail;
         auto end = m_head + QueryCount;
@@ -250,9 +252,9 @@ class D3D11ZoneScope
 public:
     tracy_force_inline D3D11ZoneScope( D3D11Ctx* ctx, const SourceLocationData* srcloc, bool is_active )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -277,9 +279,9 @@ public:
 
     tracy_force_inline D3D11ZoneScope( D3D11Ctx* ctx, const SourceLocationData* srcloc, int depth, bool is_active )
 #ifdef TRACY_ON_DEMAND
-        : m_active( is_active && GetProfiler().IsConnected() )
+        : m_active( is_active && ProfilerAvailable() && GetProfiler().IsConnected() )
 #else
-        : m_active( is_active )
+        : m_active( is_active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -306,9 +308,9 @@ public:
 
     tracy_force_inline D3D11ZoneScope(D3D11Ctx* ctx, uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz, bool active)
 #ifdef TRACY_ON_DEMAND
-        : m_active(active&& GetProfiler().IsConnected())
+        : m_active(active && ProfilerAvailable() && GetProfiler().IsConnected())
 #else
-        : m_active(active)
+        : m_active(active && ProfilerAvailable() )
 #endif
     {
         if( !m_active ) return;
@@ -335,9 +337,9 @@ public:
 
     tracy_force_inline D3D11ZoneScope(D3D11Ctx* ctx, uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz, int depth, bool active)
 #ifdef TRACY_ON_DEMAND
-        : m_active(active&& GetProfiler().IsConnected())
+        : m_active(active && ProfilerAvailable() && GetProfiler().IsConnected())
 #else
-        : m_active(active)
+        : m_active(active && ProfilerAvailable())
 #endif
     {
         if( !m_active ) return;

@@ -254,8 +254,8 @@ public:
     {
         if( !name ) GetProfiler().m_frameCount.fetch_add( 1, std::memory_order_relaxed );
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         auto item = QueueSerial();
         MemWrite( &item->hdr.type, QueueType::FrameMarkMsg );
         MemWrite( &item->frameMark.time, GetTime() );
@@ -267,8 +267,8 @@ public:
     {
         assert( type == QueueType::FrameMarkMsgStart || type == QueueType::FrameMarkMsgEnd );
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if( !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         auto item = QueueSerial();
         MemWrite( &item->hdr.type, type );
         MemWrite( &item->frameMark.time, GetTime() );
@@ -282,8 +282,8 @@ public:
         auto& profiler = GetProfiler();
         assert( profiler.m_frameCount.load( std::memory_order_relaxed ) < std::numeric_limits<uint32_t>::max() );
 #  ifdef TRACY_ON_DEMAND
-        if( !profiler.IsConnected() ) return;
 #  endif
+        if( ! ProfilerAvailable() || !profiler.IsConnected() ) return;
         const auto sz = size_t( w ) * size_t( h ) * 4;
         auto ptr = (char*)tracy_malloc( sz );
         memcpy( ptr, image, sz );
@@ -303,8 +303,8 @@ public:
     static tracy_force_inline void PlotData( const char* name, int64_t val )
     {
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if( !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         TracyLfqPrepare( QueueType::PlotData );
         MemWrite( &item->plotData.name, (uint64_t)name );
         MemWrite( &item->plotData.time, GetTime() );
@@ -316,8 +316,8 @@ public:
     static tracy_force_inline void PlotData( const char* name, float val )
     {
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         TracyLfqPrepare( QueueType::PlotData );
         MemWrite( &item->plotData.name, (uint64_t)name );
         MemWrite( &item->plotData.time, GetTime() );
@@ -329,8 +329,8 @@ public:
     static tracy_force_inline void PlotData( const char* name, double val )
     {
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         TracyLfqPrepare( QueueType::PlotData );
         MemWrite( &item->plotData.name, (uint64_t)name );
         MemWrite( &item->plotData.time, GetTime() );
@@ -356,8 +356,8 @@ public:
     {
         assert( size < std::numeric_limits<uint16_t>::max() );
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         if( callstack != 0 )
         {
             tracy::GetProfiler().SendCallstack( callstack );
@@ -376,8 +376,8 @@ public:
     static tracy_force_inline void Message( const char* txt, int callstack )
     {
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if( !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         if( callstack != 0 )
         {
             tracy::GetProfiler().SendCallstack( callstack );
@@ -393,8 +393,8 @@ public:
     {
         assert( size < std::numeric_limits<uint16_t>::max() );
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         if( callstack != 0 )
         {
             tracy::GetProfiler().SendCallstack( callstack );
@@ -416,8 +416,8 @@ public:
     static tracy_force_inline void MessageColor( const char* txt, uint32_t color, int callstack )
     {
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         if( callstack != 0 )
         {
             tracy::GetProfiler().SendCallstack( callstack );
@@ -453,8 +453,8 @@ public:
     {
         if( secure && !ProfilerAvailable() ) return;
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         const auto thread = GetThreadHandle();
 
         GetProfiler().m_serialLock.lock();
@@ -466,8 +466,8 @@ public:
     {
         if( secure && !ProfilerAvailable() ) return;
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if( !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         const auto thread = GetThreadHandle();
 
         GetProfiler().m_serialLock.lock();
@@ -481,8 +481,8 @@ public:
 #ifdef TRACY_HAS_CALLSTACK
         auto& profiler = GetProfiler();
 #  ifdef TRACY_ON_DEMAND
-        if( !profiler.IsConnected() ) return;
 #  endif
+        if(  !ProfilerAvailable() || !profiler.IsConnected() ) return;
         const auto thread = GetThreadHandle();
 
         auto callstack = Callstack( depth );
@@ -508,8 +508,8 @@ public:
 #ifdef TRACY_HAS_CALLSTACK
         auto& profiler = GetProfiler();
 #  ifdef TRACY_ON_DEMAND
-        if( !profiler.IsConnected() ) return;
 #  endif
+    if(  !ProfilerAvailable() || !profiler.IsConnected() ) return;
         const auto thread = GetThreadHandle();
 
         auto callstack = Callstack( depth );
@@ -528,8 +528,8 @@ public:
     {
         if( secure && !ProfilerAvailable() ) return;
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if( !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         const auto thread = GetThreadHandle();
 
         GetProfiler().m_serialLock.lock();
@@ -542,8 +542,8 @@ public:
     {
         if( secure && !ProfilerAvailable() ) return;
 #ifdef TRACY_ON_DEMAND
-        if( !GetProfiler().IsConnected() ) return;
 #endif
+        if( !ProfilerAvailable() || !GetProfiler().IsConnected() ) return;
         const auto thread = GetThreadHandle();
 
         GetProfiler().m_serialLock.lock();
@@ -558,8 +558,8 @@ public:
 #ifdef TRACY_HAS_CALLSTACK
         auto& profiler = GetProfiler();
 #  ifdef TRACY_ON_DEMAND
-        if( !profiler.IsConnected() ) return;
 #  endif
+        if(  !ProfilerAvailable() || !profiler.IsConnected() ) return;
         const auto thread = GetThreadHandle();
 
         auto callstack = Callstack( depth );
@@ -582,8 +582,8 @@ public:
 #ifdef TRACY_HAS_CALLSTACK
         auto& profiler = GetProfiler();
 #  ifdef TRACY_ON_DEMAND
-        if( !profiler.IsConnected() ) return;
 #  endif
+        if(  !ProfilerAvailable() || !profiler.IsConnected() ) return;
         const auto thread = GetThreadHandle();
 
         auto callstack = Callstack( depth );

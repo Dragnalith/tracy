@@ -3855,9 +3855,9 @@ TRACY_API TracyCZoneCtx ___tracy_emit_zone_begin( const struct ___tracy_source_l
 {
     ___tracy_c_zone_context ctx;
 #ifdef TRACY_ON_DEMAND
-    ctx.active = active && tracy::GetProfiler().IsConnected();
+    ctx.active = active && tracy::ProfilerAvailable() && tracy::GetProfiler().IsConnected();
 #else
-    ctx.active = active;
+    ctx.active = active && tracy::ProfilerAvailable();
 #endif
     if( !ctx.active ) return ctx;
     const auto id = tracy::GetProfiler().GetNextZoneId();
@@ -3883,9 +3883,9 @@ TRACY_API TracyCZoneCtx ___tracy_emit_zone_begin_callstack( const struct ___trac
 {
     ___tracy_c_zone_context ctx;
 #ifdef TRACY_ON_DEMAND
-    ctx.active = active && tracy::GetProfiler().IsConnected();
+    ctx.active = active && tracy::ProfilerAvailable() && tracy::GetProfiler().IsConnected();
 #else
-    ctx.active = active;
+    ctx.active = active && tracy::ProfilerAvailable();
 #endif
     if( !ctx.active ) return ctx;
     const auto id = tracy::GetProfiler().GetNextZoneId();
@@ -3912,9 +3912,9 @@ TRACY_API TracyCZoneCtx ___tracy_emit_zone_begin_alloc( uint64_t srcloc, int act
 {
     ___tracy_c_zone_context ctx;
 #ifdef TRACY_ON_DEMAND
-    ctx.active = active && tracy::GetProfiler().IsConnected();
+    ctx.active = active && tracy::ProfilerAvailable() && tracy::GetProfiler().IsConnected();
 #else
-    ctx.active = active;
+    ctx.active = active && tracy::ProfilerAvailable();
 #endif
     if( !ctx.active )
     {
@@ -3944,9 +3944,9 @@ TRACY_API TracyCZoneCtx ___tracy_emit_zone_begin_alloc_callstack( uint64_t srclo
 {
     ___tracy_c_zone_context ctx;
 #ifdef TRACY_ON_DEMAND
-    ctx.active = active && tracy::GetProfiler().IsConnected();
+    ctx.active = active && tracy::ProfilerAvailable() && tracy::GetProfiler().IsConnected();
 #else
-    ctx.active = active;
+    ctx.active = active && tracy::ProfilerAvailable();
 #endif
     if( !ctx.active )
     {

@@ -144,11 +144,11 @@ namespace tracy {
             if (m_tail == m_head) return;
 
 #ifdef TRACY_ON_DEMAND
-            if (!GetProfiler().IsConnected())
+#endif
+            if (!ProfilerAvailable() || !GetProfiler().IsConnected())
             {
                 m_head = m_tail = 0;
             }
-#endif
 
             for (; m_tail != m_head; m_tail = (m_tail + 1) % QueryCount)
             {
@@ -234,9 +234,9 @@ namespace tracy {
     public:
         tracy_force_inline OpenCLCtxScope(OpenCLCtx* ctx, const SourceLocationData* srcLoc, bool is_active)
 #ifdef TRACY_ON_DEMAND
-            : m_active(is_active&& GetProfiler().IsConnected())
+            : m_active(is_active && ProfilerAvailable() && GetProfiler().IsConnected())
 #else
-            : m_active(is_active)
+            : m_active(is_active && ProfilerAvailable())
 #endif
             , m_ctx(ctx)
             , m_event(nullptr)
@@ -257,9 +257,9 @@ namespace tracy {
 
         tracy_force_inline OpenCLCtxScope(OpenCLCtx* ctx, const SourceLocationData* srcLoc, int depth, bool is_active)
 #ifdef TRACY_ON_DEMAND
-            : m_active(is_active&& GetProfiler().IsConnected())
+            : m_active(is_active && ProfilerAvailable() && GetProfiler().IsConnected())
 #else
-            : m_active(is_active)
+            : m_active(is_active && ProfilerAvailable())
 #endif
             , m_ctx(ctx)
             , m_event(nullptr)
@@ -282,9 +282,9 @@ namespace tracy {
 
         tracy_force_inline OpenCLCtxScope(OpenCLCtx* ctx, uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz, bool is_active)
 #ifdef TRACY_ON_DEMAND
-            : m_active(is_active && GetProfiler().IsConnected())
+            : m_active(is_active && ProfilerAvailable() && GetProfiler().IsConnected())
 #else
-            : m_active(is_active)
+            : m_active(is_active && ProfilerAvailable())
 #endif
             , m_ctx(ctx)
             , m_event(nullptr)
@@ -306,9 +306,9 @@ namespace tracy {
 
         tracy_force_inline OpenCLCtxScope(OpenCLCtx* ctx, uint32_t line, const char* source, size_t sourceSz, const char* function, size_t functionSz, const char* name, size_t nameSz, int depth, bool is_active)
 #ifdef TRACY_ON_DEMAND
-            : m_active(is_active && GetProfiler().IsConnected())
+            : m_active(is_active && ProfilerAvailable() && GetProfiler().IsConnected())
 #else
-            : m_active(is_active)
+            : m_active(is_active && ProfilerAvailable())
 #endif
             , m_ctx(ctx)
             , m_event(nullptr)

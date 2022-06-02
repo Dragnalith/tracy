@@ -17,9 +17,9 @@ public:
     tracy_force_inline LockableCtx( const SourceLocationData* srcloc )
         : m_id( GetLockCounter().fetch_add( 1, std::memory_order_relaxed ) )
 #ifdef TRACY_ON_DEMAND
-        , m_lockCount( 0 )
-        , m_active( false )
 #endif
+        , m_lockCount( 0 )
+        , m_active(  ProfilerAvailable() )
     {
         assert( m_id != std::numeric_limits<uint32_t>::max() );
 
@@ -53,17 +53,17 @@ public:
     tracy_force_inline bool BeforeLock()
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         bool queue = false;
         const auto locks = m_lockCount.fetch_add( 1, std::memory_order_relaxed );
         const auto active = m_active.load( std::memory_order_relaxed );
         if( locks == 0 || active )
         {
-            const bool connected = GetProfiler().IsConnected();
+            const bool connected =  ProfilerAvailable() && GetProfiler().IsConnected();
             if( active != connected ) m_active.store( connected, std::memory_order_relaxed );
             if( connected ) queue = true;
         }
         if( !queue ) return false;
-#endif
 
         auto item = Profiler::QueueSerial();
         MemWrite( &item->hdr.type, QueueType::LockWait );
@@ -87,14 +87,14 @@ public:
     tracy_force_inline void AfterUnlock()
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         m_lockCount.fetch_sub( 1, std::memory_order_relaxed );
         if( !m_active.load( std::memory_order_relaxed ) ) return;
-        if( !GetProfiler().IsConnected() )
+        if(  !ProfilerAvailable() || !GetProfiler().IsConnected() )
         {
             m_active.store( false, std::memory_order_relaxed );
             return;
         }
-#endif
 
         auto item = Profiler::QueueSerial();
         MemWrite( &item->hdr.type, QueueType::LockRelease );
@@ -107,6 +107,7 @@ public:
     tracy_force_inline void AfterTryLock( bool acquired )
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         if( !acquired ) return;
 
         bool queue = false;
@@ -114,12 +115,11 @@ public:
         const auto active = m_active.load( std::memory_order_relaxed );
         if( locks == 0 || active )
         {
-            const bool connected = GetProfiler().IsConnected();
+            const bool connected =  ProfilerAvailable() && GetProfiler().IsConnected();
             if( active != connected ) m_active.store( connected, std::memory_order_relaxed );
             if( connected ) queue = true;
         }
         if( !queue ) return;
-#endif
 
         if( acquired )
         {
@@ -135,15 +135,15 @@ public:
     tracy_force_inline void Mark( const SourceLocationData* srcloc )
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         const auto active = m_active.load( std::memory_order_relaxed );
         if( !active ) return;
-        const auto connected = GetProfiler().IsConnected();
+        const auto connected = ProfilerAvailable() && GetProfiler().IsConnected();
         if( !connected )
         {
             if( active ) m_active.store( false, std::memory_order_relaxed );
             return;
         }
-#endif
 
         auto item = Profiler::QueueSerial();
         MemWrite( &item->hdr.type, QueueType::LockMark );
@@ -173,9 +173,9 @@ private:
     uint32_t m_id;
 
 #ifdef TRACY_ON_DEMAND
+#endif
     std::atomic<uint32_t> m_lockCount;
     std::atomic<bool> m_active;
-#endif
 };
 
 template<class T>
@@ -232,9 +232,9 @@ public:
     tracy_force_inline SharedLockableCtx( const SourceLocationData* srcloc )
         : m_id( GetLockCounter().fetch_add( 1, std::memory_order_relaxed ) )
 #ifdef TRACY_ON_DEMAND
+#endif
         , m_lockCount( 0 )
         , m_active( false )
-#endif
     {
         assert( m_id != std::numeric_limits<uint32_t>::max() );
 
@@ -268,17 +268,17 @@ public:
     tracy_force_inline bool BeforeLock()
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         bool queue = false;
         const auto locks = m_lockCount.fetch_add( 1, std::memory_order_relaxed );
         const auto active = m_active.load( std::memory_order_relaxed );
         if( locks == 0 || active )
         {
-            const bool connected = GetProfiler().IsConnected();
+            const bool connected = ProfilerAvailable() && GetProfiler().IsConnected();
             if( active != connected ) m_active.store( connected, std::memory_order_relaxed );
             if( connected ) queue = true;
         }
         if( !queue ) return false;
-#endif
 
         auto item = Profiler::QueueSerial();
         MemWrite( &item->hdr.type, QueueType::LockWait );
@@ -302,14 +302,14 @@ public:
     tracy_force_inline void AfterUnlock()
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         m_lockCount.fetch_sub( 1, std::memory_order_relaxed );
         if( !m_active.load( std::memory_order_relaxed ) ) return;
-        if( !GetProfiler().IsConnected() )
+        if( !ProfilerAvailable() || !GetProfiler().IsConnected() )
         {
             m_active.store( false, std::memory_order_relaxed );
             return;
         }
-#endif
 
         auto item = Profiler::QueueSerial();
         MemWrite( &item->hdr.type, QueueType::LockRelease );
@@ -322,6 +322,7 @@ public:
     tracy_force_inline void AfterTryLock( bool acquired )
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         if( !acquired ) return;
 
         bool queue = false;
@@ -329,12 +330,11 @@ public:
         const auto active = m_active.load( std::memory_order_relaxed );
         if( locks == 0 || active )
         {
-            const bool connected = GetProfiler().IsConnected();
+            const bool connected =  ProfilerAvailable() && GetProfiler().IsConnected();
             if( active != connected ) m_active.store( connected, std::memory_order_relaxed );
             if( connected ) queue = true;
         }
         if( !queue ) return;
-#endif
 
         if( acquired )
         {
@@ -350,17 +350,17 @@ public:
     tracy_force_inline bool BeforeLockShared()
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         bool queue = false;
         const auto locks = m_lockCount.fetch_add( 1, std::memory_order_relaxed );
         const auto active = m_active.load( std::memory_order_relaxed );
         if( locks == 0 || active )
         {
-            const bool connected = GetProfiler().IsConnected();
+            const bool connected =  ProfilerAvailable() && GetProfiler().IsConnected();
             if( active != connected ) m_active.store( connected, std::memory_order_relaxed );
             if( connected ) queue = true;
         }
         if( !queue ) return false;
-#endif
 
         auto item = Profiler::QueueSerial();
         MemWrite( &item->hdr.type, QueueType::LockSharedWait );
@@ -384,14 +384,14 @@ public:
     tracy_force_inline void AfterUnlockShared()
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         m_lockCount.fetch_sub( 1, std::memory_order_relaxed );
         if( !m_active.load( std::memory_order_relaxed ) ) return;
-        if( !GetProfiler().IsConnected() )
+        if( ProfilerAvailable() || !GetProfiler().IsConnected() )
         {
             m_active.store( false, std::memory_order_relaxed );
             return;
         }
-#endif
 
         auto item = Profiler::QueueSerial();
         MemWrite( &item->hdr.type, QueueType::LockSharedRelease );
@@ -404,6 +404,7 @@ public:
     tracy_force_inline void AfterTryLockShared( bool acquired )
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         if( !acquired ) return;
 
         bool queue = false;
@@ -411,12 +412,11 @@ public:
         const auto active = m_active.load( std::memory_order_relaxed );
         if( locks == 0 || active )
         {
-            const bool connected = GetProfiler().IsConnected();
+            const bool connected = ProfilerAvailable() && GetProfiler().IsConnected();
             if( active != connected ) m_active.store( connected, std::memory_order_relaxed );
             if( connected ) queue = true;
         }
         if( !queue ) return;
-#endif
 
         if( acquired )
         {
@@ -432,15 +432,15 @@ public:
     tracy_force_inline void Mark( const SourceLocationData* srcloc )
     {
 #ifdef TRACY_ON_DEMAND
+#endif
         const auto active = m_active.load( std::memory_order_relaxed );
         if( !active ) return;
-        const auto connected = GetProfiler().IsConnected();
+        const auto connected = ProfilerAvailable() && GetProfiler().IsConnected();
         if( !connected )
         {
             if( active ) m_active.store( false, std::memory_order_relaxed );
             return;
         }
-#endif
 
         auto item = Profiler::QueueSerial();
         MemWrite( &item->hdr.type, QueueType::LockMark );
@@ -470,9 +470,9 @@ private:
     uint32_t m_id;
 
 #ifdef TRACY_ON_DEMAND
+#endif
     std::atomic<uint32_t> m_lockCount;
     std::atomic<bool> m_active;
-#endif
 };
 
 template<class T>
